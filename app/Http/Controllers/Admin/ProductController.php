@@ -6,9 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Http\Requests\ProductRequest;
+
+use Session;
+use Str;
+use Auth;
+use DB;
 
 class ProductController extends Controller
 {
+    public function __construct()
+    {
+        $this->data['statuses'] = Product::statuses();
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -32,6 +43,7 @@ class ProductController extends Controller
 
         $this->data['categories'] = $categories->toArray();
         $this->data['product'] = null;
+        $this->data['categoryIDs'] = [];
 
         return view('admin.products.form', $this->data);
     }
@@ -42,9 +54,28 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        //
+        $params = $request->except('_token');
+        $params['slug'] = Str::slug($params['name']);
+        $params['user_id'] = Auth::user()->id;
+        
+        $saved = false;
+        $saved = DB::transaction(function() use ($params){
+            $product = Product::create($params);
+            $product->categories()->sync($params['category_ids']);
+
+            return true;
+        });
+        
+        if($saved){
+            Session::flash('success','Product Has Been Saved');
+        }
+        else{
+            Session::flash('error','Product Could Not Be Saved');
+        }
+
+        return redirect('admin/products');
     }
 
     /**
