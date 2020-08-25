@@ -97,7 +97,15 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        //
+        $product = Product::findOrFail($id);
+        $categories = Category::orderBy('name','ASC')->get();
+
+        $this->data['categories'] = $categories->toArray();
+        $this->data['product'] = $product;
+        $this->data['categoryIDs'] = $product->categories->pluck('id')->toArray();
+
+        return view('admin.products.form', $this->data);
+
     }
 
     /**
@@ -107,9 +115,29 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProductRequest $request, $id)
     {
-        //
+        $params = $request->except('_token');
+        $params['slug'] = Str::slug($params['name']);
+
+        $product = Product::findOrFail($id);
+
+        $saved = false;
+        $saved = DB::transaction(function() use($product, $params){
+            $product->update($params);
+            $product->categories()->sync($params['category_ids']);
+
+            return true;
+        });
+
+        if($saved){
+            Session::flash('success','Product Has Been Saved');
+        }
+        else{
+            Session::flash('error','Product Could Not Be Saved');
+        }
+
+        return redirect('admin/products');
     }
 
     /**
@@ -120,6 +148,12 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product = Product::findOrFail($id);
+        
+        if($product->delete()){
+            Session::flash('success', 'Product has been deleted');
+        }
+
+        return redirect('admin/products');
     }
 }
