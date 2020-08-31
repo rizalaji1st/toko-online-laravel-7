@@ -49,7 +49,9 @@ class Handler extends ExceptionHandler
      * @throws \Throwable
      */
     public function render($request, Throwable $exception)
-    {
+    {   
+        
+
         return parent::render($request, $exception);
     }
 }
