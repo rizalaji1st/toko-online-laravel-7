@@ -176,6 +176,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         
         App\Providers\GeneralServicesProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,        
+        Laracasts\Flash\FlashServiceProvider::class,
     ],
 
     /*

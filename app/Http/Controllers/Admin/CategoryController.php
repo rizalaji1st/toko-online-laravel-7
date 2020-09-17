@@ -9,9 +9,11 @@ use App\Models\Category;
 use Illuminate\Contracts\Session\Session as SessionSession;
 use Illuminate\Support\Str;
 use Session;
+use App\Authorizable;
 
 class CategoryController extends Controller
 {
+    use Authorizable;
     /**
      * Display a listing of the resource.
      *

@@ -12,8 +12,10 @@ use App\Models\Attribute;
 use App\Models\AttributeOption;
 
 use Session;
+use App\Authorizable;
 class AttributeController extends Controller
 {
+    use Authorizable;
     public function __construct(){
         $this->data['types'] = Attribute::types();
         $this->data['booleanOptions'] = Attribute::booleanOptions();
